@@ -245,9 +245,15 @@ async function getAssetDataByAddress(address: string): Promise<any> {
         {})
 }
 
+// Token mint addresses on Solana mainnet
+const tokenMintMap: { [key: string]: string } = {
+    'USDC': 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+};
+
 async function getAssetDataByToken(token: string): Promise<any> {
+    const mintAddress = tokenMintMap[token] || token;
     return await request(
-        `https://price.jup.ag/v4/price?ids=${token}`,
+        `https://api.jup.ag/price/v2?ids=${mintAddress}`,
         {})
 }
 
@@ -302,11 +308,11 @@ async function getAssetsData() {
     const buySymbol: string = buyAssetData?.Data?.SYMBOL
 
     const quoteAssetData = await getAssetDataByToken(QUOTE_SYMBOL)
-    if (!Object.keys(quoteAssetData?.data?.[QUOTE_SYMBOL]).length) {
+    if (!quoteAssetData?.data) {
         throw new Error(`Token ${QUOTE_SYMBOL} is not found.`)
     }
 
-    const quoteAddress: string = quoteAssetData?.data[QUOTE_SYMBOL]?.id
+    const quoteAddress: string = tokenMintMap[QUOTE_SYMBOL]
 
     return {buySymbol, quoteAddress}
 }
